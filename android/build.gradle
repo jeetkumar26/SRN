@@ -1,0 +1,33 @@
+// Top-level build file — pure React Native CLI (no Expo plugins)
+
+buildscript {
+    ext {
+        buildToolsVersion = "36.0.0"
+        minSdkVersion = 24
+        compileSdkVersion = 36
+        targetSdkVersion = 36
+        ndkVersion = "27.1.12297006"
+    }
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath("com.android.tools.build:gradle:8.11.0")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.20")
+        // Required by @react-native-firebase — processes google-services.json
+        classpath("com.google.gms:google-services:4.4.2")
+    }
+}
+
+plugins {
+    id("com.facebook.react.rootproject")
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        maven { url 'https://www.jitpack.io' }
+    }
+}

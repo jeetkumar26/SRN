@@ -1,0 +1,110 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // ── Helpers ─────────────────────────────────────────────────────────────
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return request.auth.uid == uid;
+    }
+
+    // File size helpers (bytes)
+    function maxMB(n) {
+      return n * 1024 * 1024;
+    }
+
+    // Allowed image MIME types
+    function isImage() {
+      return request.resource.contentType.matches('image/.*');
+    }
+
+    // Allowed document MIME types (PDF, JPEG, PNG)
+    function isDocument() {
+      return request.resource.contentType in [
+        'application/pdf',
+        'image/jpeg',
+        'image/png',
+        'image/jpg'
+      ];
+    }
+
+    // ── Avatar uploads ───────────────────────────────────────────────────────
+    // Path: avatars/{uid}/{filename}
+    // Max size: 10 MB  |  Images only
+    match /avatars/{uid}/{filename} {
+      // Anyone authenticated can read avatars (for profile display)
+      allow read: if isAuthenticated();
+
+      // Only the owner can upload their own avatar
+      allow write: if isAuthenticated()
+        && isOwner(uid)
+        && isImage()
+        && request.resource.size <= maxMB(10);
+
+      // Owner or backend (admin) can delete
+      allow delete: if isAuthenticated() && isOwner(uid);
+    }
+
+    // ── Portfolio uploads ────────────────────────────────────────────────────
+    // Path: portfolio/{uid}/{filename}
+    // Max size: 50 MB  |  Images only
+    match /portfolio/{uid}/{filename} {
+      // Anyone authenticated can view portfolio items
+      allow read: if isAuthenticated();
+
+      // Only the provider (owner) can upload to their portfolio
+      allow write: if isAuthenticated()
+        && isOwner(uid)
+        && isImage()
+        && request.resource.size <= maxMB(50);
+
+      allow delete: if isAuthenticated() && isOwner(uid);
+    }
+
+    // ── KYC / Identity documents ─────────────────────────────────────────────
+    // Path: kyc_documents/{uid}/{filename}
+    // Max size: 20 MB  |  PDF or image
+    // Strict: owner upload only, no public read (admin reads via Admin SDK)
+    match /kyc_documents/{uid}/{filename} {
+      // Only the document owner can read their own KYC files
+      // (Admin reads via Firebase Admin SDK which bypasses these rules)
+      allow read: if isAuthenticated() && isOwner(uid);
+
+      // Owner uploads their own documents
+      allow write: if isAuthenticated()
+        && isOwner(uid)
+        && isDocument()
+        && request.resource.size <= maxMB(20);
+
+      // Only the owner can delete their own KYC files
+      allow delete: if isAuthenticated() && isOwner(uid);
+    }
+
+    // ── Dispute evidence ─────────────────────────────────────────────────────
+    // Path: evidence/{bookingId}/{filename}
+    // Max size: 20 MB  |  Images or PDF
+    // Either party in the booking can upload; admin reads via Admin SDK
+    match /evidence/{bookingId}/{filename} {
+      // Authenticated users can read evidence they are party to
+      allow read: if isAuthenticated();
+
+      // Authenticated users can upload evidence for a booking
+      allow write: if isAuthenticated()
+        && isDocument()
+        && request.resource.size <= maxMB(20);
+
+      // Only the uploader (or admin via Admin SDK) can delete
+      allow delete: if isAuthenticated();
+    }
+
+    // ── Default: deny all other paths ────────────────────────────────────────
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

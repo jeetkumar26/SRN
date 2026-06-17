@@ -1,0 +1,587 @@
+Build a mobile app: 
+
+Create a premium futuristic marketplace mobile app and  design system for a startup called “Skill Requirement Network”.
+
+The platform is a requirement-based marketplace platform where:
+
+* businesses
+
+* startups
+
+* customers
+
+can:
+
+* search skilled people
+
+* post short-term requirements
+
+* hire digital or local service providers
+
+* communicate securely inside the app
+
+The platform is NOT a job portal.
+
+It is:
+
+a short-term requirement-to-service matching ecosystem.
+
+==================================================
+
+DESIGN STYLE
+
+============
+
+Style:
+
+* futuristic
+
+* light mode NO dark 
+
+* premium
+
+* modern
+
+* clean
+
+* minimal
+
+* AI-powered feel
+
+* globally scalable startup aesthetic
+
+Design inspiration:
+
+* Linear
+
+* Airbnb
+
+* Notion
+
+* Arc Browser
+
+* Discord
+
+* modern AI SaaS platforms
+
+Avoid:
+
+* cluttered Indian marketplace UI
+
+* gaming UI
+
+* cyberpunk overload
+
+* crypto-style design
+
+* cheap gradients
+
+* overcrowded screens
+
+==================================================
+
+==================================================
+
+TYPOGRAPHY
+
+==========
+
+Font style:
+
+* modern sans-serif
+
+* clean
+
+* premium
+
+Recommended:
+
+* Inter
+
+* Satoshi
+
+* Plus Jakarta Sans
+
+Use:
+
+* large bold headings
+
+* soft rounded UI
+
+* modern spacing system
+
+* strong hierarchy
+
+==================================================
+
+CORE DESIGN LANGUAGE
+
+====================
+
+Use:
+
+* light premium theme
+
+* glassmorphism lightly
+
+* rounded corners
+
+* soft shadows
+
+* floating cards
+
+* blur effects
+
+* smooth transitions
+
+* modern gradients
+
+* premium spacing
+
+Search bar must be:
+
+* large
+
+* dominant
+
+* central identity
+
+Cards should feel:
+
+* modular
+
+* interactive
+
+* premium
+
+* scalable
+
+==================================================
+
+CREATE COMPLETE UI/UX FLOWS
+
+===========================
+
+Design complete mobile + responsive web screens for:
+
+1. Splash Screen
+
+2. Language Selection
+
+3. Onboarding
+
+4. Login
+
+5. Signup
+
+6. Email OTP Verification
+
+7. Aadhaar Verification
+
+8. Profile Photo Upload
+
+9. Account Type Selection
+
+Account Types:
+
+* Business / Startup
+
+* Personal Account
+
+* Digital Skill Provider
+
+* Local Service Provider
+
+==================================================
+
+BUSINESS FLOW
+
+=============
+
+Create business onboarding screens for:
+
+* company name
+
+* business category
+
+* industry/sector
+
+Examples:
+
+* healthcare
+
+* fintech
+
+* agriculture
+
+* software
+
+* agency
+
+* startup
+
+Create:
+
+* requirement posting UI
+
+* AI recommendation dashboard
+
+* provider comparison system
+
+* bidding system
+
+* quotation system
+
+==================================================
+
+DIGITAL SKILL PROVIDER FLOW
+
+===========================
+
+Create profile system for:
+
+* professional title
+
+* skills
+
+* experience
+
+* portfolio
+
+* videos
+
+* PDFs
+
+* website links
+
+* GitHub
+
+* Behance
+
+Create:
+
+* provider dashboard
+
+* bid management
+
+* AI profile score
+
+* trust badges
+
+* portfolio reels
+
+==================================================
+
+LOCAL SERVICE PROVIDER FLOW
+
+===========================
+
+Create onboarding and dashboard for:
+
+* electrician
+
+* painter
+
+* plumber
+
+* tutor
+
+* photographer
+
+* mehendi artist
+
+* carpenter
+
+* local artist
+
+Include:
+
+* service radius
+
+* availability
+
+* emergency support
+
+* work gallery
+
+* before/after media
+
+* customer reviews
+
+==================================================
+
+CUSTOMER/PERSONAL FLOW
+
+======================
+
+Create flows for:
+
+* nearby search
+
+* service discovery
+
+* requirement posting
+
+* provider booking
+
+* review submission
+
+==================================================
+
+SEARCH EXPERIENCE
+
+=================
+
+The search experience is the CORE identity.
+
+Design:
+
+* universal smart search
+
+* nearby search
+
+* username search
+
+* full name search
+
+* service category search
+
+Examples:
+
+* plumber near me
+
+* web developer
+
+* logo designer
+
+* painter nearby
+
+Search results should show:
+
+* profile image
+
+* rating
+
+* response score
+
+* verification badge
+
+* short intro
+
+* distance/location
+
+==================================================
+
+CHAT SYSTEM
+
+===========
+
+Design a premium WhatsApp-style in-app communication system.
+
+Features:
+
+* realtime chat
+
+* image sharing
+
+* PDF upload
+
+* voice notes
+
+* live location sharing
+
+* quotations
+
+* read receipts
+
+* typing indicators
+
+IMPORTANT:
+
+Phone numbers and emails are hidden.
+
+Users communicate only inside platform.
+
+==================================================
+
+MONETIZATION SYSTEM
+
+===================
+
+Free Users:
+
+* can search
+
+* can chat
+
+* cannot view phone/email
+
+Premium Users:
+
+* can unlock direct contact details
+
+Design:
+
+* subscription screens
+
+* premium upgrade UI
+
+* trust-focused monetization
+
+==================================================
+
+AI FEATURES
+
+===========
+
+Create AI-powered interfaces for:
+
+* provider recommendations
+
+* AI analytics
+
+* trust scoring
+
+* fraud detection alerts
+
+* smart bidding insights
+
+AI panels should feel:
+
+* intelligent
+
+* premium
+
+* futuristic
+
+* minimal
+
+==================================================
+
+PROFILE SYSTEM
+
+==============
+
+Profiles should support:
+
+* videos
+
+* images
+
+* reels
+
+* portfolio links
+
+* ratings
+
+* reviews
+
+* trust score
+
+* response score
+
+* verification badges
+
+Profiles should feel:
+
+* creator-focused
+
+* trust-heavy
+
+* premium
+
+* modern
+
+==================================================
+
+ADMIN PANEL
+
+===========
+
+Create admin dashboard UI for:
+
+* user moderation
+
+* fraud detection
+
+* analytics
+
+* subscription management
+
+* verification review
+
+* reports
+
+* support tickets
+
+==================================================
+
+RESPONSIVE DESIGN
+
+=================
+
+Design:
+
+* mobile-first
+
+* tablet responsive
+
+* desktop responsive
+
+* modern web dashboard experience
+
+==================================================
+
+ANIMATIONS
+
+==========
+
+Use:
+
+* smooth transitions
+
+* soft hover effects
+
+* premium motion
+
+* subtle loading states
+
+* AI glow effects
+
+Avoid:
+
+* excessive animations
+
+* distracting movement
+
+==================================================
+
+FINAL DESIGN GOAL
+
+=================
+
+The app should feel like:
+
+“the future of service discovery and requirement matching.”
+
+It should feel:
+
+* globally scalable
+
+* AI-powered
+
+* trustworthy
+
+* premium
+
+* modern
+
+* unicorn-startup level
+
+* emotionally clean
+
+* highly usable
+
+
+
+My requirement - React Native (Expo) mobile app NOT A WEB APP

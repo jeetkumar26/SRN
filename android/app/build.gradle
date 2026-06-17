@@ -1,0 +1,125 @@
+apply plugin: "com.android.application"
+apply plugin: "org.jetbrains.kotlin.android"
+apply plugin: "com.facebook.react"
+
+/**
+ * React Native Android build configuration.
+ * Expo references have been fully removed — this is a pure React Native CLI project.
+ */
+react {
+    /*
+     * debuggableVariants controls which build variants load JS from Metro at runtime.
+     * Default is ["debug"], meaning debug APKs connect to Metro instead of bundling JS.
+     * Setting to [] means ALL variants (including debug) get a bundled JS — required for
+     * installing debug APKs on real devices without running a Metro server.
+     */
+    debuggableVariants = []
+
+    /* Entry point for the JS bundle */
+    entryFile = file("../../index.js")
+
+    /* Resolve react-native directory from node_modules */
+    reactNativeDir = new File(
+        ["node", "--print", "require.resolve('react-native/package.json')"]
+            .execute(null, rootDir).text.trim()
+    ).getParentFile().getAbsoluteFile()
+
+    /* Hermes compiler */
+    hermesCommand = new File(
+        ["node", "--print", "require.resolve('react-native/package.json')"]
+            .execute(null, rootDir).text.trim()
+    ).getParentFile().getAbsolutePath() + "/sdks/hermesc/%OS-BIN%/hermesc"
+
+    /* Codegen directory */
+    codegenDir = new File(
+        ["node", "--print",
+         "require.resolve('@react-native/codegen/package.json', { paths: [require.resolve('react-native/package.json')] })"]
+            .execute(null, rootDir).text.trim()
+    ).getParentFile().getAbsoluteFile()
+
+    autolinkLibrariesWithApp()
+}
+
+def enableMinifyInReleaseBuilds = (findProperty('android.enableMinifyInReleaseBuilds') ?: false).toBoolean()
+
+// Load signing credentials from gradle.properties (never hard-code them here)
+def releaseStoreFile     = findProperty('RELEASE_STORE_FILE')     ?: ''
+def releaseStorePassword = findProperty('RELEASE_STORE_PASSWORD')  ?: ''
+def releaseKeyAlias      = findProperty('RELEASE_KEY_ALIAS')       ?: ''
+def releaseKeyPassword   = findProperty('RELEASE_KEY_PASSWORD')    ?: ''
+
+def hasReleaseKeystore = releaseStoreFile && releaseStoreFile != 'REPLACE_WITH_KEYSTORE_PASSWORD'
+
+android {
+    ndkVersion rootProject.ext.ndkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
+    compileSdk rootProject.ext.compileSdkVersion
+
+    namespace 'com.onelayer.in'
+
+    externalNativeBuild {
+        cmake {
+            buildStagingDirectory "C:/b"
+        }
+    }
+
+    defaultConfig {
+        applicationId 'com.onelayer.in'
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode 1
+        versionName "1.0.0"
+
+        buildConfigField "String", "REACT_NATIVE_RELEASE_LEVEL", "\"${findProperty('reactNativeReleaseLevel') ?: 'stable'}\""
+    }
+
+    signingConfigs {
+        debug {
+            storeFile file('debug.keystore')
+            storePassword 'android'
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+        }
+
+        if (hasReleaseKeystore) {
+            release {
+                storeFile file(releaseStoreFile)
+                storePassword releaseStorePassword
+                keyAlias releaseKeyAlias
+                keyPassword releaseKeyPassword
+            }
+        }
+    }
+
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.debug
+        }
+        release {
+            // Uses release keystore when available, falls back to debug for local testing.
+            // BEFORE Play Store submission: generate a release keystore and fill in
+            // RELEASE_STORE_FILE / RELEASE_STORE_PASSWORD / RELEASE_KEY_ALIAS / RELEASE_KEY_PASSWORD
+            // in android/gradle.properties (see that file for the keytool command).
+            signingConfig hasReleaseKeystore ? signingConfigs.release : signingConfigs.debug
+            minifyEnabled enableMinifyInReleaseBuilds
+            shrinkResources = enableMinifyInReleaseBuilds && (findProperty('android.enableShrinkResourcesInReleaseBuilds') ?: 'false').toBoolean()
+            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+        }
+    }
+}
+
+dependencies {
+    implementation("com.facebook.react:react-android")
+
+    if (hermesEnabled.toBoolean()) {
+        implementation("com.facebook.react:hermes-android")
+    } else {
+        implementation 'io.github.react-native-community:jsc-android:2026004.+'
+    }
+}
+
+// Copy react-native-vector-icons font files into Android assets
+apply from: file("../../node_modules/react-native-vector-icons/fonts.gradle")
+
+// REQUIRED for @react-native-firebase — must be at the BOTTOM of this file
+apply plugin: "com.google.gms.google-services"

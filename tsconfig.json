@@ -1,0 +1,34 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "strict": true,
+    "jsx": "react-native",
+    "esModuleInterop": true,
+    "noEmit": true,
+    "types": ["node"],
+    "paths": {
+      "@/*": ["./src/*"],
+      "@workspace/api-client-react": [
+        "./lib/api-client-react/src/index.ts"
+      ]
+    }
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "App.tsx"
+  ],
+  "exclude": [
+    "node_modules",
+    "lib",
+    "android",
+    "ios",
+    "artifacts"
+  ],
+  "references": [
+    {
+      "path": "./lib/api-client-react"
+    }
+  ]
+}

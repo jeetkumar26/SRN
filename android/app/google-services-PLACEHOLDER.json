@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "241786797937",
+    "project_id": "skill-requirement-network",
+    "storage_bucket": "skill-requirement-network.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:241786797937:android:f49962d578df7b0f4540d0",
+        "android_client_info": {
+          "package_name": "com.onelayer.in"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAtZMqkokuVb3pEvZ8pMKru780Yh2JbQaY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

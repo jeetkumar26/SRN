@@ -1,0 +1,508 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.1.0
+  description: API specification for SRN (Skill Requirement Network)
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: users
+    description: User and Provider operations
+  - name: requirements
+    description: Gig requirements operations
+  - name: messages
+    description: Real-time chat operations
+  - name: quotes
+    description: Escrow quote negotiations
+  - name: admin
+    description: Administrator controls
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /users:
+    get:
+      operationId: listUsers
+      tags: [users]
+      summary: Search and list users/providers
+      parameters:
+        - name: role
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: query
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+    post:
+      operationId: createUser
+      tags: [users]
+      summary: Register a new user profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateUser"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  /users/{id}:
+    get:
+      operationId: getUserDetails
+      tags: [users]
+      summary: Get details of a single user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  /requirements:
+    get:
+      operationId: listRequirements
+      tags: [requirements]
+      summary: List all active job/gig requirements
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Requirement"
+    post:
+      operationId: createRequirement
+      tags: [requirements]
+      summary: Post a new job requirement
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateRequirement"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Requirement"
+
+  /messages:
+    get:
+      operationId: getMessages
+      tags: [messages]
+      summary: Retrieve chat history
+      parameters:
+        - name: senderId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: receiverId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Message"
+    post:
+      operationId: sendMessage
+      tags: [messages]
+      summary: Send a chat message
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMessage"
+      responses:
+        "201":
+          description: Sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+
+  /quotes:
+    get:
+      operationId: listQuotes
+      tags: [quotes]
+      summary: List quotes/bids for a requirement or provider
+      parameters:
+        - name: requirementId
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: senderId
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Quote"
+    post:
+      operationId: createQuote
+      tags: [quotes]
+      summary: Create an escrow proposal quote
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateQuote"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Quote"
+
+  /quotes/{id}:
+    patch:
+      operationId: updateQuoteStatus
+      tags: [quotes]
+      summary: Update escrow quote status (accept/escrow)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+              required: [status]
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Quote"
+
+  /admin/dashboard:
+    get:
+      operationId: getAdminDashboard
+      tags: [admin]
+      summary: Retrieve administrator aggregate metrics
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminDashboardData"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+        title:
+          type: string
+        rating:
+          type: number
+        reviewsCount:
+          type: integer
+        aiTrustScore:
+          type: integer
+        location:
+          type: string
+        description:
+          type: string
+        skills:
+          type: string
+        avatarUrl:
+          type: string
+        isVerified:
+          type: boolean
+        isPremium:
+          type: boolean
+        completedGigs:
+          type: integer
+        onTimeRate:
+          type: integer
+        rehireCount:
+          type: integer
+        createdAt:
+          type: string
+      required:
+        - id
+        - name
+        - email
+        - role
+
+    CreateUser:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+        title:
+          type: string
+        location:
+          type: string
+        description:
+          type: string
+        skills:
+          type: string
+      required:
+        - name
+        - email
+        - role
+
+    Requirement:
+      type: object
+      properties:
+        id:
+          type: string
+        creatorId:
+          type: string
+        title:
+          type: string
+        category:
+          type: string
+        description:
+          type: string
+        skillsNeeded:
+          type: string
+        minBudget:
+          type: integer
+        maxBudget:
+          type: integer
+        status:
+          type: string
+          description: "Lifecycle: 'open' → 'active' (bid accepted) → 'closed'"
+          enum: [open, active, closed]
+        createdAt:
+          type: string
+      required:
+        - id
+        - creatorId
+        - title
+        - category
+        - description
+        - minBudget
+        - maxBudget
+
+    CreateRequirement:
+      type: object
+      properties:
+        creatorId:
+          type: string
+        title:
+          type: string
+        category:
+          type: string
+        description:
+          type: string
+        skillsNeeded:
+          type: string
+        minBudget:
+          type: integer
+        maxBudget:
+          type: integer
+      required:
+        - creatorId
+        - title
+        - category
+        - description
+        - minBudget
+        - maxBudget
+
+    Message:
+      type: object
+      properties:
+        id:
+          type: string
+        senderId:
+          type: string
+        receiverId:
+          type: string
+        text:
+          type: string
+        attachmentUrl:
+          type: string
+        attachmentName:
+          type: string
+        attachmentSize:
+          type: string
+        quoteId:
+          type: string
+        createdAt:
+          type: string
+      required:
+        - id
+        - senderId
+        - receiverId
+        - text
+
+    CreateMessage:
+      type: object
+      properties:
+        senderId:
+          type: string
+        receiverId:
+          type: string
+        text:
+          type: string
+        attachmentUrl:
+          type: string
+        attachmentName:
+          type: string
+        attachmentSize:
+          type: string
+        quoteId:
+          type: string
+      required:
+        - senderId
+        - receiverId
+        - text
+
+    Quote:
+      type: object
+      properties:
+        id:
+          type: string
+        requirementId:
+          type: string
+        senderId:
+          type: string
+        receiverId:
+          type: string
+        amount:
+          type: integer
+        durationDays:
+          type: integer
+        status:
+          type: string
+        createdAt:
+          type: string
+      required:
+        - id
+        - requirementId
+        - senderId
+        - receiverId
+        - amount
+        - durationDays
+
+    CreateQuote:
+      type: object
+      properties:
+        requirementId:
+          type: string
+        senderId:
+          type: string
+        receiverId:
+          type: string
+        amount:
+          type: integer
+        durationDays:
+          type: integer
+      required:
+        - requirementId
+        - senderId
+        - receiverId
+        - amount
+        - durationDays
+
+    AdminDashboardData:
+      type: object
+      properties:
+        totalUsers:
+          type: integer
+        totalRequirements:
+          type: integer
+        totalBids:
+          type: integer
+        flaggedMessages:
+          type: array
+          items:
+            $ref: "#/components/schemas/Message"
+      required:
+        - totalUsers
+        - totalRequirements
+        - totalBids
+        - flaggedMessages

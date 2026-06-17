@@ -1,0 +1,10 @@
+{
+  "extends": "expo",
+  "ignorePatterns": [
+    "/node_modules",
+    "/.expo",
+    "/android",
+    "/ios",
+    "/static-build"
+  ]
+}

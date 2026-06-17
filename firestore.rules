@@ -1,0 +1,183 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helpers ─────────────────────────────────────────────────────────────
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return request.auth.uid == uid;
+    }
+
+    function getUserRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+
+    function hasRole(role) {
+      return isAuthenticated() && getUserRole() == role;
+    }
+
+    function isAdmin() {
+      return hasRole('admin');
+    }
+
+    function isProvider() {
+      return isAuthenticated() && (getUserRole() == 'digital' || getUserRole() == 'local');
+    }
+
+    function isBusinessOrCustomer() {
+      return isAuthenticated() && (getUserRole() == 'business' || getUserRole() == 'customer');
+    }
+
+    // ── users ────────────────────────────────────────────────────────────────
+    match /users/{userId} {
+      // Anyone authenticated can read public profiles (for provider search)
+      allow read: if isAuthenticated();
+      // User can only write their own document; admins can write any
+      allow create: if isAuthenticated() && isOwner(userId);
+      allow update: if isAuthenticated() && (isOwner(userId) || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    // ── requirements ────────────────────────────────────────────────────────
+    match /requirements/{reqId} {
+      // All authenticated users can read requirements
+      allow read: if isAuthenticated();
+      // Only business / customer / admin can create requirements
+      allow create: if isAuthenticated() &&
+        (getUserRole() == 'business' || getUserRole() == 'customer' || isAdmin()) &&
+        request.resource.data.creatorId == request.auth.uid;
+      // Requirement owner or admin can update
+      allow update: if isAuthenticated() &&
+        (resource.data.creatorId == request.auth.uid || isAdmin());
+      allow delete: if isAuthenticated() &&
+        (resource.data.creatorId == request.auth.uid || isAdmin());
+    }
+
+    // ── quotes (bids / proposals) ────────────────────────────────────────────
+    match /quotes/{quoteId} {
+      // Sender, receiver, or admin can read a quote
+      allow read: if isAuthenticated() &&
+        (resource.data.senderId == request.auth.uid ||
+         resource.data.receiverId == request.auth.uid ||
+         isAdmin());
+      // Only providers can create quotes
+      allow create: if isProvider() &&
+        request.resource.data.senderId == request.auth.uid;
+      // Only the receiver (requirement owner) or admin can update (accept/reject)
+      allow update: if isAuthenticated() &&
+        (resource.data.receiverId == request.auth.uid || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    // ── conversations ────────────────────────────────────────────────────────
+    match /conversations/{convId} {
+      // Only participants can read conversation metadata
+      allow read: if isAuthenticated() &&
+        request.auth.uid in resource.data.participantIds;
+      // Any authenticated user can create a new conversation
+      allow create: if isAuthenticated() &&
+        request.auth.uid in request.resource.data.participantIds;
+      // Only participants can update (e.g. lastMessage, unreadCount)
+      allow update: if isAuthenticated() &&
+        request.auth.uid in resource.data.participantIds;
+      allow delete: if isAdmin();
+
+      // Sub-collection: messages
+      match /messages/{msgId} {
+        // Conversation participants can read messages
+        allow read: if isAuthenticated() &&
+          request.auth.uid in get(/databases/$(database)/documents/conversations/$(convId)).data.participantIds;
+        // Participants can create messages; sender must be the authenticated user
+        allow create: if isAuthenticated() &&
+          request.auth.uid in get(/databases/$(database)/documents/conversations/$(convId)).data.participantIds &&
+          request.resource.data.senderId == request.auth.uid;
+        // Only allow marking messages as read (update read field only)
+        allow update: if isAuthenticated() &&
+          request.auth.uid in get(/databases/$(database)/documents/conversations/$(convId)).data.participantIds &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
+        allow delete: if isAdmin();
+      }
+    }
+
+    // ── bookings ─────────────────────────────────────────────────────────────
+    match /bookings/{bookingId} {
+      // Customer or provider of the booking can read
+      allow read: if isAuthenticated() &&
+        (resource.data.customerId == request.auth.uid ||
+         resource.data.providerId == request.auth.uid ||
+         isAdmin());
+      // Business/customer creates bookings
+      allow create: if isBusinessOrCustomer() &&
+        request.resource.data.customerId == request.auth.uid;
+      // Customer or provider can update status
+      allow update: if isAuthenticated() &&
+        (resource.data.customerId == request.auth.uid ||
+         resource.data.providerId == request.auth.uid ||
+         isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    // ── portfolios ───────────────────────────────────────────────────────────
+    match /portfolios/{itemId} {
+      // Public — anyone authenticated can view portfolios
+      allow read: if isAuthenticated();
+      // Only the owner (provider) can create/update/delete
+      allow create: if isProvider() &&
+        request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAuthenticated() &&
+        resource.data.userId == request.auth.uid;
+    }
+
+    // ── notifications ────────────────────────────────────────────────────────
+    match /notifications/{notifId} {
+      // User can only read their own notifications
+      allow read: if isAuthenticated() &&
+        resource.data.userId == request.auth.uid;
+      // Only backend (admin SDK) should create notifications — deny client writes
+      allow create: if isAdmin();
+      // User can mark their own notifications as read
+      allow update: if isAuthenticated() &&
+        resource.data.userId == request.auth.uid &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
+      allow delete: if isAuthenticated() &&
+        resource.data.userId == request.auth.uid;
+    }
+
+    // ── reviews ──────────────────────────────────────────────────────────────
+    match /reviews/{reviewId} {
+      allow read: if isAuthenticated();
+      // Customer or business can create a review for a completed booking
+      allow create: if isBusinessOrCustomer() &&
+        request.resource.data.reviewerId == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    // ── services ─────────────────────────────────────────────────────────────
+    match /services/{serviceId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isProvider() &&
+        request.resource.data.providerId == request.auth.uid;
+      allow delete: if isAuthenticated() &&
+        (resource.data.providerId == request.auth.uid || isAdmin());
+    }
+
+    // ── reports ──────────────────────────────────────────────────────────────
+    match /reports/{reportId} {
+      allow read: if isAdmin();
+      allow create: if isAuthenticated() &&
+        request.resource.data.reporterId == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    // ── analytics (platform-level) ───────────────────────────────────────────
+    match /analytics/{docId} {
+      allow read: if isAdmin();
+      allow write: if false; // written by backend only
+    }
+  }
+}
