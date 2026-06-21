@@ -1,15 +1,31 @@
 import { Platform } from "react-native";
 
+// ─── DEV API URL setup ────────────────────────────────────────────────────────
+//
+// When running on a REAL physical device (not emulator) you need a URL your
+// phone can actually reach. Choose one method:
+//
+//   METHOD 1 — USB cable (recommended, always works):
+//     a) Connect phone via USB with USB Debugging enabled
+//     b) Run on your PC:  adb reverse tcp:3000 tcp:3000
+//     c) Keep DEV_API_URL_ANDROID = "http://localhost:3000"   ← already set
+//     d) Start backend:   cd artifacts/api-server && pnpm dev
+//
+//   METHOD 2 — Same WiFi (no USB needed):
+//     a) On your PC run `ipconfig` and find your IPv4 address (e.g. 192.168.1.5)
+//     b) Set DEV_API_URL_ANDROID = "http://192.168.1.5:3000"
+//     c) Start backend:   cd artifacts/api-server && pnpm dev
+//
+//   METHOD 3 — Emulator only:
+//     Set DEV_API_URL_ANDROID = "http://10.0.2.2:3000"
+//
+// ─────────────────────────────────────────────────────────────────────────────
+const DEV_API_URL_ANDROID = "http://localhost:3000"; // works with: adb reverse tcp:3000 tcp:3000
+const DEV_API_URL_IOS = "http://localhost:3000";
+
 const ENVIRONMENTS = {
   development: {
-    // ─── How to reach the backend from a real Android device ───────────────
-    // Option A – USB cable: run `adb reverse tcp:3000 tcp:3000` on your PC,
-    //            then change the Android URL below to "http://localhost:3000"
-    // Option B – Same WiFi: find your PC's LAN IP (run `ipconfig` → IPv4),
-    //            then change the Android URL below to "http://192.168.x.x:3000"
-    // Option C – Emulator (default): leave as-is, 10.0.2.2 = PC localhost
-    // ───────────────────────────────────────────────────────────────────────
-    API_URL: Platform.OS === "ios" ? "http://localhost:3000" : "http://10.0.2.2:3000",
+    API_URL: Platform.OS === "ios" ? DEV_API_URL_IOS : DEV_API_URL_ANDROID,
     ENV_NAME: "development" as const,
   },
   staging: {
@@ -24,11 +40,19 @@ const ENVIRONMENTS = {
 
 type EnvName = keyof typeof ENVIRONMENTS;
 
+// __DEV__ is set by the Metro bundler:
+//   --dev true  → __DEV__ = true  → uses development URL (your local backend)
+//   --dev false → __DEV__ = false → uses production URL (deployed server)
+//
+// process.env.NODE_ENV is NOT reliable for this check — Metro sets it to
+// "production" even for debug APK builds when --dev false is passed, which
+// causes the app to blindly hit the production domain (which may not exist yet)
+// instead of the local backend server.
 function getCurrentEnv(): EnvName {
+  if (typeof __DEV__ !== "undefined" && __DEV__) return "development";
   const nodeEnv = process.env.NODE_ENV;
-  if (nodeEnv === "production") return "production";
   if (nodeEnv === "staging") return "staging";
-  return "development";
+  return "production";
 }
 
 const currentEnv = getCurrentEnv();
